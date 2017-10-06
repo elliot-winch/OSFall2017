@@ -1,0 +1,40 @@
+  Lecture 1: Linkers
+
+  Absolute address = Relative Address + Base address
+
+
+  4                                             Number of modules
+  1 xy 2                                        Module 1: Definition
+  1 z 4                                         Module 1: Uses
+  5 10043  56781  27774  80023  70024           Module 1: Words
+  0                                             Module 2: Definition
+  1 z 3
+  6 80013  17774  10014  30024  10023  10102
+  0
+  1 z 1                                         This module starts at absolute address 11 (6 + 5 words  from prev modules)
+  2 50013  47774
+  1 z 2 
+  1 xy 2
+  3 80002  17774  20014
+
+
+
+First pass: find defs and add to symbol table. E.g. Module 1: xy's address is 2, Module 4: z's address is 15
+
+Dealing with words:
+Ignore first digit
+Address is next three digits
+Last digit is address type
+
+e.g. 10043. Relative address (bc last digit is 3) is 004
+
+Leave immediate addresses alone
+Leave absolute addresses alone, except there is an error check
+Change relatvie addresses to abolsute addresses by addin base address
+
+Uses:
+E.g.: z 4
+Z is used in word 4 (based 0). 
+
+Word 4 (70024) means replace this external address (002) with z. The 002 is replaced with 015, but 002(4) also tells you what the next word to use z is.
+Word 2 (27774). 777 is sentiel that means linked list is done.
