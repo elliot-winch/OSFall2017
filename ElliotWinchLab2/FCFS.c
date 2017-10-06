@@ -1,18 +1,7 @@
 #include "FCFS.h"
 #include "OutputBuilder.h"
 
-#define MAX_ARRIVAL_TIME 1000000
-
 void FCFS(ProcessData* processes[], int numProcesses, int verboseMode, FILE * randNumFile){
-
-	//Init process counters
-	int i;
-	for (i = 0; i < numProcesses; i++){	
-		if(processes[i]->A > MAX_ARRIVAL_TIME){
-			printf("Process %d has an arrival time later than the maximum of %d. Please increase max arrival time to work with this test case.\n", i, MAX_ARRIVAL_TIME);
-			exit(1);
-		}
-	}
 
 	int timeCounter = -1;
 	int CPUUseTime = 0;
@@ -49,9 +38,17 @@ void FCFS(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ra
 		}
 
 		if(currentProcessIndex == -1){
-			if(findProcess(processes, numProcesses, &currentProcessIndex)){
-				processes[currentProcessIndex]->currentCPUBurstTime = randomOS(processes[currentProcessIndex]->B, randNumFile);
-				processes[currentProcessIndex]->CPUBurstTimeRemaining = processes[currentProcessIndex]->currentCPUBurstTime;
+			if(findProcessFCFS(processes, numProcesses, &currentProcessIndex)){
+				int burstTime = randomOS(processes[currentProcessIndex]->B, randNumFile);
+				
+				if(burstTime > processes[currentProcessIndex]->totalCPUTimeRemaining){
+					processes[currentProcessIndex]->currentCPUBurstTime = processes[currentProcessIndex]->totalCPUTimeRemaining;
+					processes[currentProcessIndex]->CPUBurstTimeRemaining = processes[currentProcessIndex]->totalCPUTimeRemaining;
+				} else {
+					processes[currentProcessIndex]->currentCPUBurstTime = burstTime;
+					processes[currentProcessIndex]->CPUBurstTimeRemaining = burstTime;
+				}
+
 				processes[currentProcessIndex]->state = RUNNING;
 				processes[currentProcessIndex]->currentWaitTime = 0;
 			}
@@ -68,63 +65,7 @@ void FCFS(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ra
 
 }
 
-int unFinishedProcesses(ProcessData* processes[], int numProcesses){
-	int i;
-	for(i = 0; i < numProcesses; i++){
-		if(processes[i]->state != TERMINATED){
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
-int checkBlockedProcesses(ProcessData* processes[], int numProcesses){
-	int anyBlocked = 0;
-	int i;
-	for(i = 0; i < numProcesses; i++){
-		if(processes[i]->state == BLOCKED){
-				processes[i]->IOTime++;
-				processes[i]->blockedTimeRemaining--;
-				anyBlocked = 1;
-
-			if(processes[i]->blockedTimeRemaining <= 0){
-				processes[i]->state = READY;
-			} 
-		}
-	}
-
-	return anyBlocked;
-}
-
-void checkArrivingProcesses(ProcessData* processes[], int numProcesses, int timeCounter){
-	int i;
-	for(i = 0; i < numProcesses; i++){
-		if(processes[i]->state == UNSTARTED){
-			if(processes[i]->A <= timeCounter){
-				processes[i]->state = READY;
-			}
-		}
-	}
-}
-
-void runProcess(ProcessData* currentProcess){
-	currentProcess->totalCPUTimeRemaining--;	 
-	currentProcess->CPUBurstTimeRemaining--;
-	currentProcess->CPUTime++;
-}
-
-void incReadyProcesses(ProcessData* processes[], int numProcesses){
-	int i;
-	for(i = 0; i < numProcesses; i++){
-		if(processes[i]->state == READY){
-			processes[i]->waitTime++;
-			processes[i]->currentWaitTime++;
-		}
-	}
-}
-
-int findProcess(ProcessData* processes[], int numProcesses, int* currentProcessIndex){
+int findProcessFCFS(ProcessData* processes[], int numProcesses, int* currentProcessIndex){
 	int set = 0;
 	int firstCome = -1;
 

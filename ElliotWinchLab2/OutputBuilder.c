@@ -84,32 +84,3 @@ char* getStateString(int state){
 		default: return "Unknown state!";
 	}
 }
-
-void printProcess(ProcessData* process){
-
-	printf("Process Data:\n");
-	printf("A: %d\n", process->A);
-	printf("B: %d\n", process->B);
-	printf("C: %d\n", process->C);
-	printf("M: %d\n", process->M);
-	printf("CPUTime: %d\n", process->CPUTime);
-	printf("IOTime: %d\n", process->IOTime);
-	printf("waitTime: %d\n", process->waitTime);
-	printf("state: %d\n", process->state);
-	printf("blockedTimeRemaining: %d\n", process->blockedTimeRemaining);
-	printf("currentCPUBurstTime: %d\n", process->currentCPUBurstTime);
-	printf("CPUBurstTimeRemaining: %d\n", process->CPUBurstTimeRemaining);
-	printf("totalCPUTimeRemaining: %d\n", process->totalCPUTimeRemaining);
-
-}
-
-///This is a temporary resting place for this function
-
-int randomOS(int B, FILE* randNumFile){
-	char* randInputBuffer = malloc(sizeof(char) * MAX_RAND_INPUT_LENGTH);
-	fgets(randInputBuffer, MAX_RAND_INPUT_LENGTH, randNumFile);
-
-
-	return 1 + (atoi(randInputBuffer))%B;
-
-}

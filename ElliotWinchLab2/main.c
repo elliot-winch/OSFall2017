@@ -11,62 +11,84 @@
 
 int main(int argc, char *argsv[]){
 
-	if(argc > 3 || argc == 1){
+	if((argc > 3 || argc == 1)){
+		printf("Incorrect number of arguments.\n");
 		printf("Usage: ./a.out [--verbose] processFilePath\n");
+		return;
+	} else if (argc ==3 || strcmp(argsv[2],"--verbose")){
+		printf("Invalid flag.\n");
+		printf("Usage: ./a.out [--verbose] processFilePath\n");
+
+	}
+
+	FILE * processFile;
+	processFile = fopen(argsv[argc - 1], "r");
+
+	if(processFile == NULL){
+		printf("Error: Cannot find file called %s\n", argsv[argc - 1]);
 		return;
 	}
 
 	FILE * randNumFile = fopen("random-numbers", "r");
 
-	FILE * processFile;
-
-	//Deal with verbose flag here
-	int verbose;
-	if(argc == 3){
-		processFile = fopen(argsv[2], "r");
-		verbose = 1;
-	} else {
-		processFile = fopen(argsv[1], "r");
-		verbose = 0;
-	}
-
-	if(processFile == NULL){
-		printf("Error: Cannot find file\n");
-		return;
-	}
-
 	int numProcesses = 0;
 	fscanf(processFile, "%d", &numProcesses);
 	
+	ProcessData* processesAsRead[numProcesses];
 	ProcessData* processes[numProcesses];
 
-	readProcesses(numProcesses, processes, processFile);
+	readProcesses(numProcesses, processesAsRead, processFile);
 
-	originalInput(processes, numProcesses);
+	originalInput(processesAsRead, numProcesses);
 
-	FCFS(processes, numProcesses, verbose, randNumFile);
+	/*prepProcessData(processesAsRead, processes, numProcesses);
+	FCFS(processes, numProcesses, argc - 2, randNumFile);
+	
+	prepProcessData(processesAsRead, processes, numProcesses);
+	RR(processes, numProcesses, argc - 2, randNumFile);
+		
+
+	prepProcessData(processesAsRead, processes, numProcesses);
+	SJF(processes, numProcesses, argc - 2, randNumFile);
+	*/
+
+	prepProcessData(processesAsRead, processes, numProcesses);
+	HPRN(processes, numProcesses, argc - 2, randNumFile);
 
 	fclose(processFile);
 	fclose(randNumFile);
 	
 }
 
-int readProcesses(int numProcesses, ProcessData** processes, FILE* processFile){
+int readProcesses(int numProcesses, ProcessData* processes[], FILE* processFile){
 
 	int i;
 	for(i = 0; i < numProcesses; i++){
 		processes[i] = malloc(sizeof(ProcessData));
 		fscanf(processFile, "%d %d %d %d", &(processes[i]->A), &(processes[i]->B), &(processes[i]->C), &(processes[i]->M));
-		
-		processes[i]->CPUTime = 0;
-		processes[i]->IOTime = 0;
-		processes[i]->waitTime = 0;
-		processes[i]->currentWaitTime = 0;
+	}
+}
 
-		processes[i]->state = 0;
-		processes[i]->blockedTimeRemaining = 0;
-		processes[i]->currentCPUBurstTime = 0;
-		processes[i]->CPUBurstTimeRemaining = 0;
-		processes[i]->totalCPUTimeRemaining = processes[i]->C;
+void prepProcessData(ProcessData* src[], ProcessData* dest[], int numProcesses){
+
+	int i;
+	for(i = 0; i < numProcesses; i++){
+		dest[i] = malloc(sizeof(ProcessData));
+
+		dest[i]->A = src[i]->A;
+		dest[i]->B = src[i]->B;
+		dest[i]->C = src[i]->C;
+		dest[i]->M = src[i]->M;
+
+		dest[i]->CPUTime = 0;
+		dest[i]->IOTime = 0;
+		dest[i]->waitTime = 0;
+		dest[i]->currentWaitTime = 0;
+
+		dest[i]->state = 0;
+		dest[i]->blockedTimeRemaining = 0;
+		dest[i]->currentCPUBurstTime = 0;
+		dest[i]->CPUBurstTimeRemaining = 0;
+		dest[i]->totalCPUTimeRemaining = src[i]->C;
 	}
 }
