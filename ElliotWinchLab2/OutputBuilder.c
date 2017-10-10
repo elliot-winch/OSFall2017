@@ -1,8 +1,6 @@
 #include "OutputBuilder.h"
 
-void originalInput(ProcessData* processes[], int numProcesses){
-
-	printf("\n\nThe original input was: %d", numProcesses);
+void printInput(ProcessData* processes[], int numProcesses){
 
 	int i;
 	for(i = 0; i < numProcesses; i++){

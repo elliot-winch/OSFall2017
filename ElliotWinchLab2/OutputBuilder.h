@@ -6,7 +6,7 @@
 
 typedef struct ProcessData ProcessData;
 
-void originalInput(ProcessData* processes[], int numProcesses);
+void printInput(ProcessData* processes[], int numProcesses);
 void processFinishedOutput(ProcessData* processes[], int numProcesses);
 void summaryData(ProcessData* processes[], int numProcesses, int finishingTime, int CPUUseTime, int IOUseTime);
 int verboseData(ProcessData* processes[], int numProcesses);

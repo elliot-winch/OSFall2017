@@ -22,7 +22,6 @@ void SJF(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ran
 		IOUseTime += checkBlockedProcesses(processes, numProcesses);
 		checkArrivingProcesses(processes, numProcesses, timeCounter);
 
-		//These might be combined for performance. They are separated for clarity.
 		if(currentProcessIndex >= 0){
 
 			runProcess(processes[currentProcessIndex]);
@@ -39,16 +38,11 @@ void SJF(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ran
 		}
 
 		if(currentProcessIndex == -1){
-			if(findProcessFCFS(processes, numProcesses, &currentProcessIndex)){
+			if(findProcessSJF(processes, numProcesses, &currentProcessIndex)){
 				int burstTime = randomOS(processes[currentProcessIndex]->B, randNumFile);
 				
-				if(burstTime > processes[currentProcessIndex]->totalCPUTimeRemaining){
-					processes[currentProcessIndex]->currentCPUBurstTime = processes[currentProcessIndex]->totalCPUTimeRemaining;
-					processes[currentProcessIndex]->CPUBurstTimeRemaining = processes[currentProcessIndex]->totalCPUTimeRemaining;
-				} else {
-					processes[currentProcessIndex]->currentCPUBurstTime = burstTime;
-					processes[currentProcessIndex]->CPUBurstTimeRemaining = burstTime;
-				}
+				processes[currentProcessIndex]->currentCPUBurstTime = burstTime;
+				processes[currentProcessIndex]->CPUBurstTimeRemaining = burstTime;
 
 				processes[currentProcessIndex]->state = RUNNING;
 				processes[currentProcessIndex]->currentWaitTime = 0;
@@ -77,6 +71,11 @@ int findProcessSJF(ProcessData* processes[], int numProcesses, int* currentProce
 				shortestJob = processes[i]->currentWaitTime;
 				*currentProcessIndex = i;
 				set = 1;
+			} else if(processes[i]->totalCPUTimeRemaining == shortestJob){
+				if(processes[i]->A < processes[*currentProcessIndex]->A){
+					shortestJob = processes[i]->currentWaitTime;
+					*currentProcessIndex = i;
+				} 
 			}
 		}
 	}

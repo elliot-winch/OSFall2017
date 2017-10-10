@@ -1,0 +1,46 @@
+Elliot Winch Lab 2 README
+
+My solution to Lab 2 is written in C. I used the GCC compiler to compile it on both my machine and crackle1. 
+
+This project includes the following files:
+
+main.c
+main.h
+OutputBuilder.c
+OutputBuilder.h
+ProcessMethods.c
+ProcessMethods.h
+FCFS.c
+FCFS.h
+SJF.c
+SJF.h
+RR.c
+RR.h
+HPRN.c
+HPRN.h
+random-numbers
+
+This project uses a rudimentary makefile to simplify compilation.
+The commands to compile this project are:
+
+make clean 					//deletes all .o and .out files. Not needed on first compilation
+
+make 							//compiles all files and creates the executable called 'main'
+
+./main [--verbose] inputFile   //runs the program. The verbose flag is optional. inputFile is the relative path to some input file
+
+The program will output verbose data if the flag is supplied.
+The program will supply each process' end data and a summary for four scheduling algorithms: 
+First Come First Serve
+Round Robin
+Shortest Job First
+Highest Penality Ration Next
+
+If the file 'random-numbers' does no exist in the directory, the program will alert you that it is missing
+and exit. 
+
+
+
+
+
+ 

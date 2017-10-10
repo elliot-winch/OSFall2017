@@ -3,10 +3,9 @@
 #include "main.h"
 #include "OutputBuilder.h"
 #include "FCFS.h"
-
-// #include "RR.c"
-// #include "SJF.c"
-// #include "HPRN.c"
+#include "RR.h"
+#include "SJF.h"
+#include "HPRN.h"
 
 
 int main(int argc, char *argsv[]){
@@ -14,11 +13,11 @@ int main(int argc, char *argsv[]){
 	if((argc > 3 || argc == 1)){
 		printf("Incorrect number of arguments.\n");
 		printf("Usage: ./a.out [--verbose] processFilePath\n");
-		return;
-	} else if (argc ==3 || strcmp(argsv[2],"--verbose")){
+		exit(1);
+	} else if (argc == 3 && !strcmp(argsv[2],"--verbose")){
 		printf("Invalid flag.\n");
 		printf("Usage: ./a.out [--verbose] processFilePath\n");
-
+		exit(1);
 	}
 
 	FILE * processFile;
@@ -26,10 +25,15 @@ int main(int argc, char *argsv[]){
 
 	if(processFile == NULL){
 		printf("Error: Cannot find file called %s\n", argsv[argc - 1]);
-		return;
+		exit(1);
 	}
 
-	FILE * randNumFile = fopen("random-numbers", "r");
+	FILE* randNumFile = fopen("random-numbers", "r");
+
+	if(randNumFile == NULL){
+		printf("Error: Cannot find random-numbers file\n");
+		exit(1);
+	}
 
 	int numProcesses = 0;
 	fscanf(processFile, "%d", &numProcesses);
@@ -39,25 +43,32 @@ int main(int argc, char *argsv[]){
 
 	readProcesses(numProcesses, processesAsRead, processFile);
 
-	originalInput(processesAsRead, numProcesses);
-
-	/*prepProcessData(processesAsRead, processes, numProcesses);
+	prepProcessData(processesAsRead, processes, numProcesses);
 	FCFS(processes, numProcesses, argc - 2, randNumFile);
+
+	prepProcessData(processesAsRead, processes, numProcesses);
+	/*Be kind*/rewind(randNumFile);
+	RR(processes, numProcesses, argc - 2, randNumFile);
 	
 	prepProcessData(processesAsRead, processes, numProcesses);
-	RR(processes, numProcesses, argc - 2, randNumFile);
-		
-
-	prepProcessData(processesAsRead, processes, numProcesses);
+	rewind(randNumFile);
 	SJF(processes, numProcesses, argc - 2, randNumFile);
-	*/
 
 	prepProcessData(processesAsRead, processes, numProcesses);
+	rewind(randNumFile);
 	HPRN(processes, numProcesses, argc - 2, randNumFile);
+
+	//free processesAsRead and processes
+	int f;
+	for(f = 0; f < numProcesses; f++){
+		free(processes[f]);
+		free(processesAsRead[f]);
+	}
 
 	fclose(processFile);
 	fclose(randNumFile);
 	
+	return 0;
 }
 
 int readProcesses(int numProcesses, ProcessData* processes[], FILE* processFile){
@@ -67,6 +78,30 @@ int readProcesses(int numProcesses, ProcessData* processes[], FILE* processFile)
 		processes[i] = malloc(sizeof(ProcessData));
 		fscanf(processFile, "%d %d %d %d", &(processes[i]->A), &(processes[i]->B), &(processes[i]->C), &(processes[i]->M));
 	}
+
+	printf("The original input was:\t %d ", numProcesses);
+
+	printInput(processes, numProcesses);
+
+	//Insertion sort. Though it is O(n^2), for
+	//sorting less than ten elements the difference between
+	//O(n^2) and O(logn) is minimal.
+	int k, j;
+	ProcessData* key;
+	for(k = 0; k < numProcesses; k++){
+		key = processes[k];
+		j = k - 1;
+
+		while(j >= 0 && processes[j]->A > key->A){
+			processes[j+1] = processes[j];
+			j--;
+		}
+		processes[j+1] = key;
+	}
+
+	printf("The sorted input was:\t %d ", numProcesses);
+
+	printInput(processes, numProcesses);
 }
 
 void prepProcessData(ProcessData* src[], ProcessData* dest[], int numProcesses){

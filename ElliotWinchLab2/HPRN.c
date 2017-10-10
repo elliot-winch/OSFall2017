@@ -21,7 +21,6 @@ void HPRN(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ra
 		IOUseTime += checkBlockedProcesses(processes, numProcesses);
 		checkArrivingProcesses(processes, numProcesses, timeCounter);
 
-		//These might be combined for performance. They are separated for clarity.
 		if(currentProcessIndex >= 0){
 
 			runProcess(processes[currentProcessIndex]);
@@ -38,16 +37,11 @@ void HPRN(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ra
 		}
 
 		if(currentProcessIndex == -1){
-			if(findProcessFCFS(processes, numProcesses, &currentProcessIndex)){
+			if(findProcessHPRN(processes, numProcesses, &currentProcessIndex)){
 				int burstTime = randomOS(processes[currentProcessIndex]->B, randNumFile);
 				
-				if(burstTime > processes[currentProcessIndex]->totalCPUTimeRemaining){
-					processes[currentProcessIndex]->currentCPUBurstTime = processes[currentProcessIndex]->totalCPUTimeRemaining;
-					processes[currentProcessIndex]->CPUBurstTimeRemaining = processes[currentProcessIndex]->totalCPUTimeRemaining;
-				} else {
-					processes[currentProcessIndex]->currentCPUBurstTime = burstTime;
-					processes[currentProcessIndex]->CPUBurstTimeRemaining = burstTime;
-				}
+				processes[currentProcessIndex]->currentCPUBurstTime = burstTime;
+				processes[currentProcessIndex]->CPUBurstTimeRemaining = burstTime;
 
 				processes[currentProcessIndex]->state = RUNNING;
 				processes[currentProcessIndex]->currentWaitTime = 0;
@@ -67,16 +61,26 @@ void HPRN(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ra
 
 int findProcessHPRN(ProcessData* processes[], int numProcesses, int* currentProcessIndex){
 	int set = 0;
-	int HPR = 0;
+	float HPR = 2;
 
 	int i;
 	for(i = 0; i < numProcesses; i++){
 		if(processes[i]->state == READY){
-			int curHPR = (processes[i]->CPUTime + processes[i]->IOTime + processes[i]->waitTime) / processes[i]->CPUTime;
-			if(curHPR > HPR){
+
+			float curHPR = 1;
+			if(!(processes[i]->CPUTime + processes[i]->IOTime + processes[i]->waitTime) == 0){
+				curHPR = processes[i]->CPUTime / (float)(processes[i]->CPUTime + processes[i]->IOTime + processes[i]->waitTime);
+			} 
+				
+			if(curHPR < HPR){
 				HPR = curHPR;
 				*currentProcessIndex = i;
 				set = 1;
+			} else if(curHPR == HPR){
+				if(processes[i]->A < processes[*currentProcessIndex]->A){
+					HPR = curHPR;
+					*currentProcessIndex = i;
+				} 
 			}
 		}
 	}

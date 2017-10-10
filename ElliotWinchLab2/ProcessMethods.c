@@ -60,8 +60,6 @@ int randomOS(int B, FILE* randNumFile){
 	int randNum;
 	fscanf(randNumFile, "%d", &randNum);
 
-	printf("Rand num used: %d\n", randNum);
-
 	return 1 + randNum%B;
 
 }

@@ -21,7 +21,6 @@ void FCFS(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ra
 		IOUseTime += checkBlockedProcesses(processes, numProcesses);
 		checkArrivingProcesses(processes, numProcesses, timeCounter);
 
-		//These might be combined for performance. They are separated for clarity.
 		if(currentProcessIndex >= 0){
 
 			runProcess(processes[currentProcessIndex]);
@@ -41,13 +40,8 @@ void FCFS(ProcessData* processes[], int numProcesses, int verboseMode, FILE * ra
 			if(findProcessFCFS(processes, numProcesses, &currentProcessIndex)){
 				int burstTime = randomOS(processes[currentProcessIndex]->B, randNumFile);
 				
-				if(burstTime > processes[currentProcessIndex]->totalCPUTimeRemaining){
-					processes[currentProcessIndex]->currentCPUBurstTime = processes[currentProcessIndex]->totalCPUTimeRemaining;
-					processes[currentProcessIndex]->CPUBurstTimeRemaining = processes[currentProcessIndex]->totalCPUTimeRemaining;
-				} else {
-					processes[currentProcessIndex]->currentCPUBurstTime = burstTime;
-					processes[currentProcessIndex]->CPUBurstTimeRemaining = burstTime;
-				}
+				processes[currentProcessIndex]->currentCPUBurstTime = burstTime;
+				processes[currentProcessIndex]->CPUBurstTimeRemaining = burstTime;
 
 				processes[currentProcessIndex]->state = RUNNING;
 				processes[currentProcessIndex]->currentWaitTime = 0;
@@ -76,6 +70,16 @@ int findProcessFCFS(ProcessData* processes[], int numProcesses, int* currentProc
 				firstCome = processes[i]->currentWaitTime;
 				*currentProcessIndex = i;
 				set = 1;
+			} else if(processes[i]->currentWaitTime == firstCome){
+				//How come currentProcessIndex always points to the right
+				//process? Because the above condition is always true if
+				//there are ready processes, so currentProcessIndex
+				//is set before this condition can possibly be met.
+				//This is alway why we don't have to change the 'set' flag below.
+				if(processes[i]->A < processes[*currentProcessIndex]->A){
+					firstCome = processes[i]->currentWaitTime;
+					*currentProcessIndex = i;
+				} 
 			}
 		}
 	}
